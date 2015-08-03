@@ -12,6 +12,8 @@ class Square(QtGui.QMainWindow):
     def __init__(self):
         super(Square, self).__init__()
         # ui = uic.loadUi("main.ui", self)
+        self.piece = None
+
         self.setupUi()
 
     def setupUi(self):
@@ -37,8 +39,11 @@ class Square(QtGui.QMainWindow):
         self.bluePieceGroup = QtGui.QButtonGroup(self)
         self.redCol = self.addPieceCol('red')
         self.blueCol = self.addPieceCol('blue')
+        self.redPieceGroup.buttonClicked.connect(self.pickedRed)
 
         self.board = Board(self, 14, 14)
+        self.board.dropedSignal.connect(self.droped)
+
         self.hbox = QtGui.QVBoxLayout(self.centralwidget)
         self.hbox.addWidget(self.board)
 
@@ -47,6 +52,7 @@ class Square(QtGui.QMainWindow):
 
     def addPieceCol(self, color):
         pieceBoard = QtGui.QDockWidget(self)
+        pieceBoard.setWindowTitle(color)
         pieceBoard_content = QtGui.QWidget()
         pieceBoard.setWidget(pieceBoard_content)
         # pieceBoard.setMaximumSize(QtCore.QSize(200, 524287))
@@ -67,15 +73,21 @@ class Square(QtGui.QMainWindow):
         vbox2 = QtGui.QVBoxLayout(pieceBoard_scroll_content)
         vbox2.setContentsMargins(0, 0, 0, 0)
         pg = getattr(self, color+'PieceGroup')
-        for i in range(5):
+        for i in range(7):
             p = Piece(pieceBoard_scroll_content, color, i)
             pg.addButton(p, i)
             vbox2.addWidget(p)
         pieceBoard_scroll.setWidget(pieceBoard_scroll_content)
 
-        # pieceBoard.setAllowedAreas(QtCore.Qt.LeftDockWidgetArea)
-
         return pieceBoard
+
+    def pickedRed(self, piece):
+        self.piece = piece
+        self.board.setPiece(piece)
+
+    def droped(self):
+        self.piece.setChecked(True)
+        self.piece.setEnabled(False)
 
 def main():
 
@@ -84,9 +96,8 @@ def main():
     mw = Square()
     mw.show()
 
-    square_game.exec_()
+    return square_game.exec_()
 
 if __name__ == "__main__":
-    main()
-    sys.exit()
+    sys.exit(main())
 
