@@ -4,9 +4,11 @@
 from PyQt4.QtGui import QWidget,QPainter,QColor,QImage
 from PyQt4.QtCore import QPoint,QSize,QLine,QRect,Qt,pyqtSignal
 
+from piece import Piece
+
 class Board(QWidget):
 
-    dropedSignal = pyqtSignal()
+    dropedSignal = pyqtSignal(str, int, name='piece_dropped')
 
     def __init__(self, parent, row, col):
         super(Board,self).__init__(parent)
@@ -64,9 +66,9 @@ class Board(QWidget):
             if e.button() == Qt.LeftButton:
                 p = QPainter(self.pieces)
                 p.drawImage(QPoint((self.x-2)*51, (self.y-2)*51), self.piece.getImage())
-                self.piece = None
                 self.update()
-                self.dropedSignal.emit()
+                self.dropedSignal.emit(self.piece.color, self.piece.shape)
+                self.piece = None
 
             elif e.button() == Qt.RightButton:
                 self.piece.flip()

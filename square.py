@@ -7,6 +7,8 @@ from PyQt4 import QtGui,QtCore,uic
 from piece import Piece
 from board import Board
 
+from functools import partial
+
 class Square(QtGui.QMainWindow):
 
     def __init__(self):
@@ -39,7 +41,8 @@ class Square(QtGui.QMainWindow):
         self.bluePieceGroup = QtGui.QButtonGroup(self)
         self.redCol = self.addPieceCol('red')
         self.blueCol = self.addPieceCol('blue')
-        self.redPieceGroup.buttonClicked.connect(self.pickedRed)
+        self.redPieceGroup.buttonClicked.connect(partial(self.piecePicked, 'red'))
+        self.bluePieceGroup.buttonClicked.connect(partial(self.piecePicked, 'blue'))
 
         self.board = Board(self, 14, 14)
         self.board.dropedSignal.connect(self.droped)
@@ -73,7 +76,7 @@ class Square(QtGui.QMainWindow):
         vbox2 = QtGui.QVBoxLayout(pieceBoard_scroll_content)
         vbox2.setContentsMargins(0, 0, 0, 0)
         pg = getattr(self, color+'PieceGroup')
-        for i in range(7):
+        for i in range(21):
             p = Piece(pieceBoard_scroll_content, color, i)
             pg.addButton(p, i)
             vbox2.addWidget(p)
@@ -81,13 +84,18 @@ class Square(QtGui.QMainWindow):
 
         return pieceBoard
 
-    def pickedRed(self, piece):
-        self.piece = piece
+    def piecePicked(self, color, piece):
+        # self.piece = piece
+        self.side = color
         self.board.setPiece(piece)
 
-    def droped(self):
-        self.piece.setChecked(True)
-        self.piece.setEnabled(False)
+    @QtCore.pyqtSlot(str, int)
+    def droped(self, color, shape):
+        pg = getattr(self, color+'PieceGroup')
+        pi = pg.button(shape)
+        pi.setChecked(True)
+        pi.setEnabled(False)
+
 
 def main():
 
